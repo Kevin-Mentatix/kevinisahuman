@@ -285,7 +285,7 @@ function home() {
   <div class="projects">
     ${projects.map((pr) => `<a class="project" href="${pr.url}" rel="noopener" target="_blank">
       <img src="${url('/assets/img/' + pr.img)}" alt="${esc(pr.name)} preview" width="800" height="420" loading="lazy">
-      <span class="hud">${esc(pr.kicker)}</span><span class="project-name">${esc(pr.name)} ${icon.arrow}</span><span class="project-blurb">${esc(pr.blurb)}</span>
+      <span class="project-text"><span class="hud">${esc(pr.kicker)}</span><span class="project-name">${esc(pr.name)} ${icon.arrow}</span><span class="project-blurb">${esc(pr.blurb)}</span></span>
     </a>`).join('\n')}
   </div>
 </section>
