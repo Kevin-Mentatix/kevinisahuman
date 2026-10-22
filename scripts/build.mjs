@@ -40,7 +40,8 @@ const linkify = (s) => esc(s)
   .replace(/\n{2,}/g, '</p><p>').replace(/\n/g, '<br>');
 
 // ---------- data ----------
-const videos = readJSON(VIDEOS_JSON, []);
+// Shorts stay in data/videos.json but are not published on the site.
+const videos = readJSON(VIDEOS_JSON, []).filter((v) => v.type !== 'short');
 for (const v of videos) {
   v.t = displayTitle(v.title);
   v.desc = cleanDescription(v.description);
@@ -62,8 +63,7 @@ for (const v of videos) {
 }
 const topicBy = Object.fromEntries(topics.map((t) => [t.slug, t]));
 const projectBy = Object.fromEntries(projects.map((p) => [p.id, p]));
-const longform = videos.filter((v) => v.type !== 'short');
-const shorts = videos.filter((v) => v.type === 'short');
+const longform = videos;
 for (const t of topics) t.videos = videos.filter((v) => v.topics.includes(t.slug));
 
 // ---------- entities (JSON-LD) ----------
@@ -290,11 +290,6 @@ function home() {
   </div>
 </section>
 
-${shorts.length ? `<section class="wrap section">
-  <header class="sec-head">${hud('Shorts')}<h2>Quick hits</h2><a class="more" href="${url('/videos/?type=short')}">All shorts ${icon.arrow}</a></header>
-  <div class="row-scroll">${shorts.slice(0, 10).map((v) => card(v)).join('\n')}</div>
-</section>` : ''}
-
 <section class="wrap section about-strip">
   <img src="${url('/assets/img/kevin.webp')}" alt="Kevin, host of Kevin Is A Human, at the mic" width="240" height="240" loading="lazy">
   <div>
@@ -333,7 +328,7 @@ function catalog() {
 <section class="wrap section page-head">
   ${hud(`Archive · ${videos.length} tapes`)}
   <h1>Every video</h1>
-  <p class="lede">The full Kevin Is A Human catalog: investigations, live stream VODs, and Shorts. Search by person, company, or topic.</p>
+  <p class="lede">The full Kevin Is A Human catalog: investigations and live stream VODs. Search by person, company, or topic.</p>
   <form class="filters" role="search" onsubmit="return false">
     <label class="sr" for="q">Search videos</label>
     <input id="q" type="search" placeholder="Search: Thiel, Flock, TESCREAL…" autocomplete="off">
@@ -341,7 +336,6 @@ function catalog() {
       <button type="button" class="chip" data-type="all" aria-pressed="true">All</button>
       <button type="button" class="chip" data-type="video" aria-pressed="false">Videos</button>
       <button type="button" class="chip" data-type="stream" aria-pressed="false">Live VODs</button>
-      <button type="button" class="chip" data-type="short" aria-pressed="false">Shorts</button>
     </div>
     <label class="sr" for="ch">Channel</label>
     <select id="ch"><option value="">All channels</option>${topics.map((t) => `<option value="${t.slug}">CH ${t.ch} · ${esc(t.name)}</option>`).join('')}</select>
@@ -357,7 +351,7 @@ function catalog() {
 <div class="wrap">${subscribeCta()}</div>`;
   write('/videos/', layout({
     title: 'All Videos', path: '/videos/', body,
-    description: `Browse all ${videos.length} Kevin Is A Human videos, live stream VODs, and Shorts on transhumanism, AI cults, the surveillance state, and corruption. Searchable.`,
+    description: `Browse all ${videos.length} Kevin Is A Human videos and live stream VODs on transhumanism, AI cults, the surveillance state, and corruption. Searchable.`,
     schema: [
       { '@type': 'CollectionPage', '@id': abs('/videos/'), name: 'All videos', isPartOf: { '@id': SITE_ID }, about: { '@id': PERSON_ID },
         mainEntity: { '@type': 'ItemList', numberOfItems: videos.length, itemListElement: videos.map((v, i) => ({ '@type': 'ListItem', position: i + 1, url: abs(v.path), name: v.t })) } },
@@ -456,7 +450,7 @@ ${lead ? `<section class="wrap section latest"><div class="latest-grid">
 </div></section>` : ''}
 <section class="wrap section">
   <header class="sec-head">${hud(`${t.videos.length} on this channel`)}<h2>All ${esc(t.name.toLowerCase())} videos</h2></header>
-  ${grid(others.concat(t.videos.filter((v) => v.type === 'short')))}
+  ${grid(others)}
 </section>
 <div class="wrap">${subscribeCta()}</div>`;
   write(p, layout({
@@ -607,7 +601,7 @@ ${videos.slice(0, 40).map((v) => `<item><title>${esc(v.t)}</title><link>${abs(v.
 Kevin publishes new videos on YouTube (${links.youtube}) almost every day and streams live on Kick (${links.kick}) and Twitch (${links.twitch}). Every video on this site plays via YouTube's embedded player. Each video page includes a summary, key moments, and the full transcript.
 
 ## Core pages
-- [All videos](${abs('/videos/')}): searchable catalog of ${videos.length} videos, live VODs, and Shorts
+- [All videos](${abs('/videos/')}): searchable catalog of ${videos.length} videos and live stream VODs
 - [Live](${abs('/live/')}): live stream player for Kick, Twitch, and YouTube
 - [About Kevin](${abs('/about/')}): who Kevin is, what he covers, FAQ
 - [Investigations](${abs('/projects/')}): Kevin's three research sites
